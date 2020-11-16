@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox alignment="center" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.Controller_registration">
+    <GridPane prefHeight="173.0" prefWidth="796.0">
+        <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="396.0" minWidth="10.0" prefWidth="170.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="630.0" minWidth="10.0" prefWidth="630.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints maxHeight="45.0" minHeight="7.0" prefHeight="43.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="45.0" minHeight="7.0" prefHeight="43.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="45.0" minHeight="7.0" prefHeight="43.0" />
+            <RowConstraints maxHeight="45.0" minHeight="7.0" prefHeight="43.0" />
+        </rowConstraints>
+        <children>
+
+            <Label text="Username">
+                <GridPane.margin>
+                    <Insets left="50.0" />
+                </GridPane.margin>
+                <font>
+                    <Font size="15.0" />
+                </font>
+            </Label>
+            <Label text="Password" GridPane.rowIndex="1">
+                <GridPane.margin>
+                    <Insets left="50.0" />
+                </GridPane.margin>
+                <font>
+                    <Font size="15.0" />
+                </font>
+            </Label>
+            <PasswordField fx:id="passwordField_password" prefHeight="45.0" prefWidth="580.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                <font>
+                    <Font size="15.0" />
+                </font>
+                <GridPane.margin>
+                    <Insets right="50.0" />
+                </GridPane.margin>
+            </PasswordField>
+            <TextField fx:id="textField_username" prefHeight="45.0" prefWidth="580.0" GridPane.columnIndex="1">
+                <GridPane.margin>
+                    <Insets right="50.0" />
+                </GridPane.margin>
+                <font>
+                    <Font size="15.0" />
+                </font>
+            </TextField>
+            <Label fx:id="label_error" prefHeight="17.0" prefWidth="356.0" text="" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Label text="Repeat Password" GridPane.rowIndex="2">
+                <GridPane.margin>
+                    <Insets left="50.0" />
+                </GridPane.margin>
+                <font>
+                    <Font size="15.0" />
+                </font>
+            </Label>
+            <PasswordField fx:id="passwordField_repeat_password" prefHeight="45.0" prefWidth="580.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                <font>
+                    <Font size="15.0" />
+                </font>
+                <GridPane.margin>
+                    <Insets right="50.0" />
+                </GridPane.margin>
+            </PasswordField>
+        </children>
+    </GridPane>
+
+    <Button fx:id="registration_button" maxWidth="Infinity" onAction="#buttonRegistration" text="Registration" HBox.hgrow="ALWAYS">
+        <font>
+            <Font size="15.0" />
+        </font>
+    </Button>
+
+    <Button fx:id="back_button" maxWidth="Infinity" onAction="#back" text="Back">
+        <font>
+            <Font size="15.0" />
+        </font>
+    </Button>
+    <Button maxWidth="Infinity" onAction="#buttonExitAction" text="Exit">
+        <font>
+            <Font size="15.0" />
+        </font>
+    </Button>
+
+</VBox>
