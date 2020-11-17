@@ -1,14 +1,14 @@
-import handlers.Handler;
+package me.tereshko.cloud_storage;
+
+import me.tereshko.cloud_storage.handlers.Handler;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
-import utils.GetPropertieValue;
+import me.tereshko.cloud_storage.utils.GetPropertieValue;
 
 public class Server {
 
@@ -27,18 +27,15 @@ public class Server {
             ServerBootstrap bootstrap = new ServerBootstrap();
             bootstrap.group(auth, worker)
                     .channel(NioServerSocketChannel.class)
-                    .childHandler(new ChannelInitializer<>() {
+                    .childHandler(new ChannelInitializer<SocketChannel>() {
+
                         @Override
-                        protected void initChannel(Channel channel) {
-                            channel.pipeline().addLast(
-                                    new StringDecoder(),
-                                    new StringEncoder(),
-                                    new Handler()
-                            );
+                        protected void initChannel(SocketChannel channel) {
+                            channel.pipeline().addLast(new Handler());
                         }
                     });
             ChannelFuture future = bootstrap.bind(PORT).sync();
-            System.out.println("Server started");
+            System.out.println("me.tereshko.cloud_storage.Server started");
             future.channel().closeFuture().sync(); // block
         } catch (Exception e) {
             e.printStackTrace();

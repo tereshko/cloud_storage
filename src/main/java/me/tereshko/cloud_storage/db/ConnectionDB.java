@@ -1,7 +1,7 @@
-package db;
+package me.tereshko.cloud_storage.db;
 
 import org.sqlite.SQLiteConfig;
-import utils.GetPropertieValue;
+import me.tereshko.cloud_storage.utils.GetPropertieValue;
 
 import java.sql.*;
 import java.util.Random;

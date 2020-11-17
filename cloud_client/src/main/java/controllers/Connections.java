@@ -1,7 +1,7 @@
 package controllers;
 
 import org.apache.log4j.Logger;
-import utils.GetPropertieValue;
+import me.tereshko.cloud_storage.utils.GetPropertieValue;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

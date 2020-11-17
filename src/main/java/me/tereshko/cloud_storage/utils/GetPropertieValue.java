@@ -1,4 +1,4 @@
-package utils;
+package me.tereshko.cloud_storage.utils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

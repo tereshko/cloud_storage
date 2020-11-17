@@ -17,4 +17,4 @@
 *.tar.gz
 *.rar
 
-*db-journal
+*me.tereshko.cloud_storage.db-journal
