@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox alignment="center" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/10.0.2-internal"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.Controller_tablePanel">
+
+    <HBox VBox.vgrow="ALWAYS">
+        <VBox HBox.hgrow="ALWAYS">
+            <HBox>
+                <Button onAction="#buttonServerPathUpAction" text="Up">
+                    <font>
+                        <Font size="15.0"/>
+                    </font>
+                </Button>
+                <TextField fx:id="serverPathField" editable="false" HBox.hgrow="ALWAYS">
+                    <font>
+                        <Font size="15.0"/>
+                    </font>
+                </TextField>
+                <Button onAction="#buttonRefreshServerFileList" text="Refresh">
+                    <font>
+                        <Font size="15.0"/>
+                    </font>
+                </Button>
+            </HBox>
+            <TableView fx:id="clientFilesTable" tableMenuButtonVisible="true" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS"/>
+        </VBox>
+        <VBox prefHeight="427.0" prefWidth="308.0" HBox.hgrow="ALWAYS">
+            <HBox>
+                <ComboBox fx:id="comboBoxSelectDisk" onAction="#comboBoxSelectDiskAction"/>
+                <Button onAction="#buttonPathUp" text="Up">
+                    <font>
+                        <Font size="15.0"/>
+                    </font>
+                </Button>
+                <TextField fx:id="textFiledClientPathField" editable="false" HBox.hgrow="ALWAYS">
+                    <font>
+                        <Font size="15.0"/>
+                    </font>
+                </TextField>
+                <Button onAction="#buttonRefreshClientFileList" text="Refresh">
+                    <font>
+                        <Font size="15.0"/>
+                    </font>
+                </Button>
+            </HBox>
+            <TableView fx:id="serverFilesTable" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS"/>
+
+        </VBox>
+    </HBox>
+</VBox>

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class GetPropertieValue {
+
     public String getSQLLITE_URL() {
         String url = readPropertieFromFile("SQLLITE_URL");
         return url;

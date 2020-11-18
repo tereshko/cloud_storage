@@ -3,18 +3,17 @@ package me.tereshko.cloud_storage.handlers;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import me.tereshko.cloud_storage.db.ConnectionDB;
+import me.tereshko.cloud_storage.utils.Condition;
 
 public class Handler extends ChannelInboundHandlerAdapter {
 
-    //public static final ConcurrentLinkedDeque<ChannelHandlerContext> channels = new ConcurrentLinkedDeque<>();
-    private int commandLength = 0;
-    private StringBuilder sb;
+    private Condition condition = Condition.WAIT;
 
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         System.out.println("Client connected");
-//        channels.add(ctx);
     }
 
     @Override
@@ -23,18 +22,25 @@ public class Handler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        ByteBuf buffer = ((ByteBuf) msg);
-        byte readBuffer = 0;
+    public void channelRead(ChannelHandlerContext ctx, Object object) {
+        ByteBuf buf = ((ByteBuf) object);
 
-        sb = new StringBuilder();
-        while (buffer.readableBytes() > 0) {
-            commandLength--;
-            sb.append((char) buffer.readByte());
+        while (buf.readableBytes() > 0) {
+            if (condition == Condition.WAIT) {
+                byte read = buf.readByte();
+                if (read == 16) {
+                    condition = Condition.COMMAND;
+                } else if (read == 11) {
+                    condition = Condition.NAME_LENGTH;
+                    System.out.println("Start downloading...");
+                } else {
+                    condition = Condition.WAIT;
+                    throw new RuntimeException("Unknown byte command: " + read);
+                }
+            }
+
+
         }
-
-        System.out.println(sb.toString());
-
 
 
 //        System.out.println("Message from client: " + s);
@@ -97,5 +103,6 @@ public class Handler extends ChannelInboundHandlerAdapter {
 //        //send to server
 //        String finalAnswerToClient = answerToClient;
 //        channels.forEach(c -> c.writeAndFlush(finalAnswerToClient));
+
     }
 }

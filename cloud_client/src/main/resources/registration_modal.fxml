@@ -71,13 +71,13 @@
         </children>
     </GridPane>
 
-    <Button fx:id="registration_button" maxWidth="Infinity" onAction="#buttonRegistration" text="Registration" HBox.hgrow="ALWAYS">
+    <Button fx:id="button_registration" maxWidth="Infinity" onAction="#buttonRegistration" text="Registration" HBox.hgrow="ALWAYS">
         <font>
             <Font size="15.0" />
         </font>
     </Button>
 
-    <Button fx:id="back_button" maxWidth="Infinity" onAction="#back" text="Back">
+    <Button fx:id="button_back" maxWidth="Infinity" onAction="#back" text="Back">
         <font>
             <Font size="15.0" />
         </font>

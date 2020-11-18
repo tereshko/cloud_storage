@@ -20,10 +20,10 @@ public class Controller_registration {
     Logger LOGGER = Logger.getLogger(Controller_registration.class);
 
     @FXML
-    Button back_button;
+    Button button_back;
 
     public void back(ActionEvent actionEvent) {
-        Stage stage = (Stage) back_button.getScene().getWindow();
+        Stage stage = (Stage) button_back.getScene().getWindow();
         stage.close();
 
         FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/signin_modal.fxml"));
@@ -41,7 +41,7 @@ public class Controller_registration {
     }
 
     @FXML
-    Button registration_button;
+    Button button_registration;
     @FXML
     TextField textField_username;
     @FXML
@@ -62,7 +62,7 @@ public class Controller_registration {
 
         if (isPasswordEquals) {
             LOGGER.info("username:" + userName + "password:" + pass);
-            String sendToServer = "/registration/" + "username:" + userName + "/" + "password:" + pass;
+            String sendToServer = "registration\n" + "\n" + userName + "\n:" + pass;
             LOGGER.info(sendToServer);
 
             LOGGER.info("registration. message to server: " + sendToServer);

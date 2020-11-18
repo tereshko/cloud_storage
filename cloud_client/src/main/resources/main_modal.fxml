@@ -1,40 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox alignment="center" prefHeight="600.0" prefWidth="800.0"
-      xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8.0.172-ea" fx:controller="controllers.Controller_main">
-    <MenuBar>
-        <Menu text="File">
-            <MenuItem text="Exit" onAction="#buttonExitAction"/>
-        </Menu>
-    </MenuBar>
-    <HBox spacing="5">
-        <ComboBox />
-        <TextField editable="false" HBox.hgrow="ALWAYS" />
-        <Button text="Up" />
-      <VBox.margin>
-         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-      </VBox.margin>
+<VBox alignment="center" prefHeight="600.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.Controller_main">
+
+    <HBox VBox.vgrow="ALWAYS">
+        <VBox fx:id="clientPanel" HBox.hgrow="ALWAYS">
+            <HBox>
+                <ComboBox fx:id="diskBox" onAction="#selectClientDiskAction" />
+                <Button fx:id="clientUpAction" onAction="#buttonClientPathUpAction" text="Up">
+               <font>
+                  <Font size="15.0" />
+               </font></Button>
+                <TextField fx:id="clientPathField" editable="false" HBox.hgrow="ALWAYS">
+               <font>
+                  <Font size="15.0" />
+               </font></TextField>
+                <Button onAction="#buttonClientFileListRefresh" text="Refresh">
+               <font>
+                  <Font size="15.0" />
+               </font></Button>
+            </HBox>
+            <TableView fx:id="clientFilesTable" tableMenuButtonVisible="true" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+            <opaqueInsets>
+               <Insets />
+            </opaqueInsets></TableView>
+        </VBox>
+
+        <VBox fx:id="serverPanel" HBox.hgrow="ALWAYS">
+            <HBox>
+                <Button onAction="#buttonServerPathUpAction" text="Up">
+                    <font>
+                        <Font size="15.0" />
+                    </font></Button>
+                <TextField fx:id="serverPathField" editable="false" HBox.hgrow="ALWAYS">
+                    <font>
+                        <Font size="15.0" />
+                    </font></TextField>
+                <Button onAction="#buttonServerFileListRefresh" text="Refresh">
+                    <font>
+                        <Font size="15.0" />
+                    </font></Button>
+            </HBox>
+            <TableView fx:id="serverFilesTable" tableMenuButtonVisible="true" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+            <opaqueInsets>
+               <Insets />
+            </opaqueInsets></TableView>
+        </VBox>
+
     </HBox>
-
-    <TableView fx:id="filesTable" VBox.vgrow="ALWAYS" />
-
     <HBox spacing="5">
-        <Button maxWidth="Infinity" text="Copy" HBox.hgrow="ALWAYS" />
-        <Button maxWidth="Infinity" text="Delete" HBox.hgrow="ALWAYS" />
-        <Button maxWidth="Infinity" text="Exit" HBox.hgrow="ALWAYS" onAction="#buttonExitAction"/>
-      <padding>
-         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-      </padding>
+        <Button focusTraversable="false" maxWidth="Infinity" onAction="#buttonNewFolder" text="New Folder" HBox.hgrow="ALWAYS">
+         <font>
+            <Font size="15.0" />
+         </font></Button>
+        <Button focusTraversable="false" maxWidth="Infinity" onAction="#buttonCopy" text="Copy" HBox.hgrow="ALWAYS">
+         <font>
+            <Font size="15.0" />
+         </font></Button>
+        <Button focusTraversable="false" maxWidth="Infinity" onAction="#buttonDelete" text="Delete" HBox.hgrow="ALWAYS">
+         <font>
+            <Font size="15.0" />
+         </font></Button>
+        <Button focusTraversable="false" maxWidth="Infinity" onAction="#buttonExitAction" text="Exit" HBox.hgrow="ALWAYS">
+         <font>
+            <Font size="15.0" />
+         </font></Button>
+        <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+        </padding>
     </HBox>
 </VBox>

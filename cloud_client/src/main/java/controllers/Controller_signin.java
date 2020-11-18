@@ -58,19 +58,35 @@ public class Controller_signin {
         String userName = textField_username.getText();
         //TODO сделать проверку на то, что данные не пустые
 
-        LOGGER.info("buttonLogIn. "+ "username: " + userName + "password: " + pass);
+        LOGGER.info("buttonLogIn." + " username: " + userName + " password: " + pass);
 
-        String sendToServer = "/authorization/" + "username:" + userName + "/" + "password:" + pass;
+        String sendToServer = "authorization\n" + "\n" + userName + "\n" + pass;
         LOGGER.info("buttonLogIn. message to server: " + sendToServer);
 
-        Connections connection = new Connections();
-        String answerFromServer = connection.getSendToServer(sendToServer);
-        LOGGER.info("buttonLogIn. answerFromServer: " + answerFromServer);
+        //Connections connection = new Connections();
+        //connection.server_connection();
+        //String answerFromServer = connection.getSendToServer(sendToServer);
+        //LOGGER.info("buttonLogIn. answerFromServer: " + answerFromServer);
+        String answerFromServer = "authOK";
 
         //-1 mean that user not found or some errors
         if (answerFromServer.equals("authOK")) {
-            label_error.setText("User authorized");
-        } else{
+            Stage stage = (Stage) registration.getScene().getWindow();
+            stage.close();
+
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/main_modal.fxml"));
+
+            Parent registration_scene = null;
+            try {
+                registration_scene = fxmlLoader.load();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            stage = new Stage();
+            stage.setTitle("Cloud Client");
+            stage.setScene(new Scene(registration_scene));
+            stage.show();
+        } else {
             label_error.setText("User not found");
         }
 
@@ -79,6 +95,4 @@ public class Controller_signin {
     private String getCryptPass(String pass) {
         return GFG.toHexString(GFG.getSHA(pass));
     }
-
-
 }
