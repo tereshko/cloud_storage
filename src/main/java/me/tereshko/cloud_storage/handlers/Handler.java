@@ -1,18 +1,22 @@
 package me.tereshko.cloud_storage.handlers;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.socket.SocketChannel;
 import me.tereshko.cloud_storage.db.ConnectionDB;
 import me.tereshko.cloud_storage.utils.Condition;
+import me.tereshko.cloud_storage.utils.FileInfo;
 import me.tereshko.cloud_storage.utils.NetworkSignalsForAction;
 import me.tereshko.cloud_storage.utils.ServerCommands;
 
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 public class Handler extends ChannelInboundHandlerAdapter {
 
@@ -23,6 +27,8 @@ public class Handler extends ChannelInboundHandlerAdapter {
     int userID = -1;
     ConnectionDB connectionDB = new ConnectionDB();
     ServerCommands serverCommands = new ServerCommands();
+    private Path userPath;
+    private final String LOCAL_PATH = "user";
 
 
     @Override
@@ -55,9 +61,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
             }
 
             if (condition == Condition.COMMAND) {
-                System.out.println("commandLength: " + commandLength);
                 if (buf.readableBytes() >= 4) {
-                    System.out.println("commandLength: " + commandLength);
                     commandLength = buf.readInt();
                     condition = Condition.COMMAND_READED;
                 }
@@ -76,11 +80,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
             }
 
             if (condition == Condition.NEED_ACTION) {
-                String commandForDo = commandRead.toString();
-                String[] split = commandForDo.split("\n");
-                System.out.println("split 0: " + split[0]);
-                System.out.println("split 1: " + split[1]);
-                System.out.println("split 2: " + split[2]);
+                String[] split = commandRead.toString().split("\n");
                 switch (split[0]) {
                     case "authorization":
                         System.out.println("authorization");
@@ -88,9 +88,23 @@ public class Handler extends ChannelInboundHandlerAdapter {
                         boolean isPasswordEquals = connectionDB.comparePass(ID, split[2]);
                         if (isPasswordEquals) {
                             answerToClient = connectionDB.getFolderName(ID);
+                            Path newPath = Paths.get(LOCAL_PATH, answerToClient);
+
+
+                            userPath = newPath;
+
+                            if (!Files.exists(newPath)) {
+                                try {
+                                    Files.createDirectory(newPath);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         } else {
                             answerToClient = "NotOK";
                         }
+                        answerToClient = "auth/reg\n" + answerToClient;
+                        serverCommands.sendCommand(channelHandlerContext.channel(), answerToClient);
                         condition = Condition.WAIT;
                         break;
                     case "registration":
@@ -102,25 +116,58 @@ public class Handler extends ChannelInboundHandlerAdapter {
                             userID = connectionDB.addUser(split[1], split[2]);
                             if (userID > -1) {
                                 answerToClient = connectionDB.createNewFolder(userID);
+                                Path newPath = Paths.get(LOCAL_PATH, answerToClient);
+                                if (!Files.exists(newPath)) {
+                                    try {
+                                        Files.createDirectory(newPath);
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
                             } else {
                                 answerToClient = "NotOK";
                             }
+                            answerToClient = "auth/reg\n" + answerToClient;
+                            serverCommands.sendCommand(channelHandlerContext.channel(), answerToClient);
                             condition = Condition.WAIT;
                             break;
                         }
+                    case "SERVER_FILE_LIST":
+                        condition = Condition.SERVER_FILE_LIST;
+                        break;
                     default:
                         condition = Condition.WAIT;
                         //TODO do something
                 }
-                answerToClient = "auth/reg\n" + answerToClient;
-                serverCommands.sendCommand(channelHandlerContext.channel(), answerToClient);
-                System.out.println("ANSWER: " + answerToClient);
+            }
+
+
+            if (condition == Condition.SERVER_FILE_LIST) {
+                try {
+                    List<FileInfo> fileListOnTheServer = Files.list(userPath).map(FileInfo::new).collect(Collectors.toList());
+                    StringBuilder builder = new StringBuilder();
+                    for (FileInfo fileInfo : fileListOnTheServer) {
+                        builder.append(String.format("%s,%d,%s,%s\n",
+                                fileInfo.getFileName(),
+                                fileInfo.getSize(),
+                                fileInfo.getType(),
+                                fileInfo.getLastModified()));
+                    }
+                    System.out.println("Sended to client: " + "SERVER_FILE_LIST" + builder.toString());
+
+                    serverCommands.sendCommand(channelHandlerContext.channel(), "SERVER_FILE_LIST\n" + builder.toString());
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                condition = Condition.WAIT;
             }
         }
         if (buf.readableBytes() == 0) {
             buf.release();
         }
     }
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();

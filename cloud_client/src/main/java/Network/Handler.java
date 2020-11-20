@@ -15,7 +15,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
     private Callback callback;
     private Path currentPath = Paths.get("new");
 
-    public void getCallback(Callback callbackMessage){
+    public void getCallback(Callback callbackMessage) {
         this.callback = callbackMessage;
     }
 
@@ -40,9 +40,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
             }
 
             if (condition == Condition.COMMAND) {
-                System.out.println("commandLength: " + commandLength);
                 if (buffer.readableBytes() >= 4) {
-                    System.out.println("commandLength: " + commandLength);
                     commandLength = buffer.readInt();
                     condition = Condition.COMMAND_READED;
                 }
@@ -60,8 +58,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
                 condition = Condition.NEED_ACTION;
             }
             if (condition == Condition.NEED_ACTION) {
-                String commandForDo = commandRead.toString();
-                String[] split = commandForDo.split("\n");
+                String[] split = commandRead.toString().split("\n");
                 switch (split[0]) {
                     case "auth/reg":
                         String answer = split[1];
@@ -70,10 +67,15 @@ public class Handler extends ChannelInboundHandlerAdapter {
                             //TODO can not authorize
                         } else {
                             callback.callback(answer);
-                            System.out.println("Folder: " +answer);
+                            System.out.println("Folder: " + answer);
                         }
                         condition = Condition.WAIT;
                         break;
+                    case "SERVER_FILE_LIST":
+                        callback.callback(commandRead.toString());
+                        condition = Condition.WAIT;
+                        break;
+
                     default:
                         condition = Condition.WAIT;
                 }

@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 import security.GFG;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class Controller_signin {
     Logger LOGGER = Logger.getLogger(Controller_signin.class);
@@ -66,6 +65,7 @@ public class Controller_signin {
 
         String sendToServer = "authorization\n" + userName + "\n" + pass;
 
+        System.out.println("Sended to server: " + sendToServer);
         clientCommands.sendCommand(client.getCurrentChannel(), sendToServer);
 
         client.getHandler().getCallback(callback -> {

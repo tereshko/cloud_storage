@@ -1,5 +1,7 @@
 package controllers;
 
+import Network.Client;
+import Network.ClientCommands;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -15,13 +17,15 @@ import utils.FileInfo;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.*;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class Controller_main implements Initializable {
     @FXML
     TableView<FileInfo> clientFilesTable;
+    @FXML
+    TableView<FileInfo> serverFilesTable;
 
     @FXML
     ComboBox<String> diskBox;
@@ -32,58 +36,19 @@ public class Controller_main implements Initializable {
     @FXML
     Button clientUpAction;
 
+
     @FXML
     VBox clientPanel, serverPanel;
 
+    private Client client = Client.getInstance();
+    ClientCommands clientCommands = new ClientCommands();
+    private List<FileInfo> serverFileList;
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        TableColumn<FileInfo, String> fileTypeColumn = new TableColumn<>();
-        fileTypeColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getType().getName()));
-        fileTypeColumn.setPrefWidth(24);
-
-        TableColumn<FileInfo, String> fileNameColumn = new TableColumn<>("Name");
-        fileNameColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getFileName()));
-        fileNameColumn.setPrefWidth(240);
-
-        TableColumn<FileInfo, Long> fileSizeColumn = new TableColumn<>("Size");
-        fileSizeColumn.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().getSize()));
-        fileSizeColumn.setCellFactory(column -> {
-            return new TableCell<FileInfo, Long>() {
-                @Override
-                protected void updateItem(Long item, boolean empty) {
-                    super.updateItem(item, empty);
-                    if (item == null || empty) {
-                        setText(null);
-                        setStyle("");
-                    } else {
-                        String text = String.format("%,d bytes", item);
-                        if (item == -1L) {
-                            text = "[DIR]";
-                        }
-                        setText(text);
-                    }
-                }
-            };
-        });
-        fileNameColumn.setPrefWidth(120);
-
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        TableColumn<FileInfo, String> fileLastModifiedColumn = new TableColumn<>("Updated");
-        fileLastModifiedColumn.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getLastModified()
-                .format(dateTimeFormatter)));
-        fileLastModifiedColumn.setPrefWidth(120);
-
-
-        clientFilesTable.getColumns().addAll(fileTypeColumn, fileNameColumn, fileSizeColumn, fileLastModifiedColumn);
-
-
-        clientFilesTable.getSortOrder().add(fileTypeColumn);
-
-        diskBox.getItems().clear();
-        for (Path p : FileSystems.getDefault().getRootDirectories()) {
-            diskBox.getItems().add(p.toString());
-        }
-        diskBox.getSelectionModel().select(0);
+        Tables.prepareTable(clientFilesTable);
+        Tables.comboBoxPrepare(diskBox);
+        Tables.prepareTable(serverFilesTable);
 
         clientFilesTable.setOnMouseClicked(new EventHandler<MouseEvent>() {
             @Override
@@ -99,6 +64,25 @@ public class Controller_main implements Initializable {
             }
         });
         updateFileListClient(Paths.get("."));
+        clientCommands.sendCommand(client.getCurrentChannel(), "SERVER_FILE_LIST");
+
+        client.getHandler().getCallback(MESSAGE ->{
+            String[] command = MESSAGE.split("\n");
+            if (command[0].equals("SERVER_FILE_LIST")) {
+                if (MESSAGE.split("\n").length != 1){
+                    serverFileList = clientCommands.createFileList(MESSAGE.split("\n", 2)[1]);
+                    Platform.runLater(() -> {
+                        serverFilesTable.getItems().clear();
+                        serverFileList.forEach(o -> serverFilesTable.getItems().add(o));
+                        serverFilesTable.sort();
+                    });} else {
+                    Platform.runLater(() -> {
+                        serverFilesTable.getItems().clear();
+                    });
+                }
+            }
+        });
+
     }
 
     public void updateFileListClient(Path path) {

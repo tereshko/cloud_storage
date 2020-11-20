@@ -5,7 +5,7 @@ public enum Condition {
     NAME,
     NAME_LENGTH,
     File,
-    FILE_LIST,
+    SERVER_FILE_LIST,
     FILE_LENGTH,
     COMMAND,
     NEED_ACTION,
