@@ -1,5 +1,7 @@
 package controllers;
 
+import Network.Client;
+import Network.ClientCommands;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,15 +17,17 @@ import org.apache.log4j.Logger;
 import security.GFG;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Controller_signin {
     Logger LOGGER = Logger.getLogger(Controller_signin.class);
+    private Client client = Client.getInstance();
+    ClientCommands clientCommands = new ClientCommands();
 
 
     public void buttonExitAction(ActionEvent actionEvent) {
         Platform.exit();
     }
-
 
     @FXML
     Button registration;
@@ -60,36 +64,43 @@ public class Controller_signin {
 
         LOGGER.info("buttonLogIn." + " username: " + userName + " password: " + pass);
 
-        String sendToServer = "authorization\n" + "\n" + userName + "\n" + pass;
-        LOGGER.info("buttonLogIn. message to server: " + sendToServer);
+        String sendToServer = "authorization\n" + userName + "\n" + pass;
 
-        //Connections connection = new Connections();
-        //connection.server_connection();
-        //String answerFromServer = connection.getSendToServer(sendToServer);
-        //LOGGER.info("buttonLogIn. answerFromServer: " + answerFromServer);
-        String answerFromServer = "authOK";
+        clientCommands.sendCommand(client.getCurrentChannel(), sendToServer);
 
-        //-1 mean that user not found or some errors
-        if (answerFromServer.equals("authOK")) {
-            Stage stage = (Stage) registration.getScene().getWindow();
-            stage.close();
-
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/main_modal.fxml"));
-
-            Parent registration_scene = null;
-            try {
-                registration_scene = fxmlLoader.load();
-            } catch (IOException e) {
-                e.printStackTrace();
+        client.getHandler().getCallback(callback -> {
+            System.out.println("CLIENT: " + callback);
+            if (callback.equals("notOk")) {
+                Platform.runLater(() -> {
+                            label_error.setText("User not found");
+                        }
+                );
+            } else {
+                changeScheme();
             }
-            stage = new Stage();
-            stage.setTitle("Cloud Client");
-            stage.setScene(new Scene(registration_scene));
-            stage.show();
-        } else {
-            label_error.setText("User not found");
-        }
+        });
+    }
 
+    private void changeScheme() {
+        Platform.runLater(() -> {
+                    Stage stage = (Stage) registration.getScene().getWindow();
+                    stage.close();
+
+                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/main_modal.fxml"));
+
+                    Parent registration_scene = null;
+                    try {
+                        registration_scene = fxmlLoader.load();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    stage = new Stage();
+                    stage.setTitle("Cloud Client");
+                    stage.setScene(new Scene(registration_scene));
+                    stage.show();
+
+                }
+        );
     }
 
     private String getCryptPass(String pass) {

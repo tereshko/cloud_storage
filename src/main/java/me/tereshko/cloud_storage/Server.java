@@ -12,6 +12,7 @@ import me.tereshko.cloud_storage.utils.GetPropertieValue;
 
 public class Server {
 
+
     public static void main(String[] args) {
         new Server();
     }
@@ -20,7 +21,7 @@ public class Server {
         GetPropertieValue getPropertieValue = new GetPropertieValue();
         int PORT = getPropertieValue.getPORT();
 
-        EventLoopGroup auth = new NioEventLoopGroup(1);
+        EventLoopGroup auth = new NioEventLoopGroup();
         EventLoopGroup worker = new NioEventLoopGroup();
 
         try {
@@ -35,7 +36,7 @@ public class Server {
                         }
                     });
             ChannelFuture future = bootstrap.bind(PORT).sync();
-            System.out.println("me.tereshko.cloud_storage.Server started");
+            System.out.println("Server started");
             future.channel().closeFuture().sync(); // block
         } catch (Exception e) {
             e.printStackTrace();
@@ -44,4 +45,5 @@ public class Server {
             worker.shutdownGracefully();
         }
     }
+
 }

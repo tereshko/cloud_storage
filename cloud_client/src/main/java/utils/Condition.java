@@ -1,13 +1,13 @@
 package utils;
 
 public enum Condition {
-    IDLE,
+    WAIT,
     NAME,
     NAME_LENGTH,
     File,
     FILE_LIST,
     FILE_LENGTH,
     COMMAND,
-    COMMAND_DO,
-    COMMAND_READ
+    NEED_ACTION,
+    COMMAND_READED
 }

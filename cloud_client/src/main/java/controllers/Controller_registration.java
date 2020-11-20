@@ -1,5 +1,8 @@
 package controllers;
 
+import Network.Client;
+import Network.ClientCommands;
+
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,6 +21,10 @@ import java.io.IOException;
 
 public class Controller_registration {
     Logger LOGGER = Logger.getLogger(Controller_registration.class);
+
+    private Client client = Client.getInstance();
+    ClientCommands clientCommands = new ClientCommands();
+
 
     @FXML
     Button button_back;
@@ -62,20 +69,18 @@ public class Controller_registration {
 
         if (isPasswordEquals) {
             LOGGER.info("username:" + userName + "password:" + pass);
-            String sendToServer = "registration\n" + "\n" + userName + "\n:" + pass;
-            LOGGER.info(sendToServer);
+            String sendToServer = "registration\n" + userName + "\n" + pass;
 
             LOGGER.info("registration. message to server: " + sendToServer);
 
-            Connections connection = new Connections();
-            String answerFromServer = connection.getSendToServer(sendToServer);
-            LOGGER.info("buttonLogIn. answerFromServer: " + answerFromServer);
+            clientCommands.sendCommand(client.getCurrentChannel(), sendToServer);
 
-            if (answerFromServer.equals("regNotOK")) {
-                label_error.setText("user not registered");
-            } else {
-                label_error.setText("user registered");
-            }
+            final String[] answerFromServer = new String[1];
+            client.getHandler().getCallback(callback -> {
+                answerFromServer[0] = callback;
+            });
+
+            label_error.setText("User Successfully Registered");
         } else {
             label_error.setText("Passwords not equals");
         }

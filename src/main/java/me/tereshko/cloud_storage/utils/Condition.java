@@ -8,6 +8,6 @@ public enum Condition {
     FILE_LIST,
     FILE_LENGTH,
     COMMAND,
-    COMMAND_DO,
-    COMMAND_READ
+    NEED_ACTION,
+    COMMAND_READED
 }

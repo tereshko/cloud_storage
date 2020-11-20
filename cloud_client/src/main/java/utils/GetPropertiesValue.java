@@ -5,18 +5,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class GetPropertieValue {
+public class GetPropertiesValue {
     public int getPORT() {
-        int port = Integer.parseInt(readPropertieFromFile("PORT"));
+        int port = Integer.parseInt(readPropertiesFromFile("PORT"));
         return port;
     }
 
     public String getADDRESS() {
-        String address = readPropertieFromFile("ADDRESS");
+        String address = null;
+        address = readPropertiesFromFile("ADDRESS");
         return address;
     }
 
-    private String readPropertieFromFile(String propertyName) {
+    private String readPropertiesFromFile(String propertyName) {
         String result = null;
         InputStream inputStream = null;
 

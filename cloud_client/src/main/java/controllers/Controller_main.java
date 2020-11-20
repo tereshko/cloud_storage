@@ -10,7 +10,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
 import utils.FileInfo;
 
 import java.io.IOException;
@@ -146,8 +145,9 @@ public class Controller_main implements Initializable {
     public void buttonNewFolder(ActionEvent actionEvent) {
     }
 
+    //TODO button copy. need to implement
     public void buttonCopy(ActionEvent actionEvent) {
-        clientPanel.getProperties().get("ctrl")
+        clientPanel.getProperties().get("ctrl");
     }
 
     public void buttonDelete(ActionEvent actionEvent) {
