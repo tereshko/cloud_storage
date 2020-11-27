@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
@@ -16,7 +15,7 @@
                         <Font size="15.0"/>
                     </font>
                 </Button>
-                <TextField fx:id="serverPathField" editable="false" HBox.hgrow="ALWAYS">
+                <TextField fx:id="textFiledServerPathField" editable="false" HBox.hgrow="ALWAYS">
                     <font>
                         <Font size="15.0"/>
                     </font>

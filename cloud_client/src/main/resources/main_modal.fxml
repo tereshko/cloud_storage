@@ -36,7 +36,7 @@
                     <font>
                         <Font size="15.0" />
                     </font></Button>
-                <TextField fx:id="serverPathField" editable="false" HBox.hgrow="ALWAYS">
+                <TextField fx:id="serverPathFiled" editable="false" HBox.hgrow="ALWAYS">
                     <font>
                         <Font size="15.0" />
                     </font></TextField>

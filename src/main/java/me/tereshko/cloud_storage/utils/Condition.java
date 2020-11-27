@@ -2,11 +2,11 @@ package me.tereshko.cloud_storage.utils;
 
 public enum Condition {
     WAIT,
-    NAME,
-    NAME_LENGTH,
-    File,
-    SERVER_FILE_LIST,
+    FILE_NAME_LENGTH,
+    FILE_NAME,
     FILE_LENGTH,
+    FILE,
+    SERVER_FILE_LIST,
     COMMAND,
     NEED_ACTION,
     COMMAND_READED

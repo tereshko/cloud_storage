@@ -3,9 +3,19 @@ package Network;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.DefaultFileRegion;
+import io.netty.channel.FileRegion;
+import io.netty.util.concurrent.FutureListener;
 import utils.FileInfo;
 import utils.FileType;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,5 +49,51 @@ public class ClientCommands {
             temp.add(fileInfo);
         }
         return temp;
+    }
+
+    public void uploadFile(Channel channel, FutureListener listener, Path path) {
+        FileRegion fileRegion = null;
+        try {
+            fileRegion = new DefaultFileRegion(new FileInputStream(path.toFile()).getChannel(), 0, Files.size(path.normalize()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        byte[] filenameBytes = path.getFileName().toString().getBytes(StandardCharsets.UTF_8);
+        buffer = ByteBufAllocator.DEFAULT.directBuffer(1 + 4 + filenameBytes.length + 8);
+        buffer.writeByte(NetworkSignalsForAction.FILE_BYTE);
+        buffer.writeInt(path.getFileName().toString().length());
+        buffer.writeBytes(filenameBytes);
+        try {
+            buffer.writeLong(Files.size(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        channel.writeAndFlush(buffer);
+        ChannelFuture future = channel.writeAndFlush(fileRegion);
+
+        if (listener != null) {
+            future.addListener(listener);
+        }
+    }
+
+    public void deleteFile(Path path) {
+        try {
+            Files.delete(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void createDirectory(Path path, String folderName) {
+        File file = new File(path + File.separator + folderName);
+        if (file.exists()) {
+            try {
+                throw new Exception("The directory is already exists");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else {
+            file.mkdir();
+        }
     }
 }

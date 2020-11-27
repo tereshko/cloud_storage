@@ -9,8 +9,8 @@ import me.tereshko.cloud_storage.utils.FileInfo;
 import me.tereshko.cloud_storage.utils.NetworkSignalsForAction;
 import me.tereshko.cloud_storage.utils.ServerCommands;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -29,6 +29,11 @@ public class Handler extends ChannelInboundHandlerAdapter {
     ServerCommands serverCommands = new ServerCommands();
     private Path userPath;
     private final String LOCAL_PATH = "user";
+    private int fileNameLength = 0;
+    private long fileSize = 0L;
+    BufferedOutputStream out;
+    private long receivedFileSize = 0L;
+    String userFolder;
 
 
     @Override
@@ -45,6 +50,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext channelHandlerContext, Object object) {
         ByteBuf buf = ((ByteBuf) object);
         System.out.println("CHANNEL READ");
+
         while (buf.readableBytes() > 0) {
             if (condition == Condition.WAIT) {
                 byte read = buf.readByte();
@@ -52,8 +58,8 @@ public class Handler extends ChannelInboundHandlerAdapter {
                     condition = Condition.COMMAND;
                     System.out.println("Command COMMAND_BYTE");
                 } else if (read == NetworkSignalsForAction.FILE_BYTE) {
-                    condition = Condition.NAME_LENGTH;
-                    System.out.println("Command NAME_LENGTH");
+                    condition = Condition.FILE_NAME_LENGTH;
+                    System.out.println("Command FILE_NAME_LENGTH");
                 } else {
                     condition = Condition.WAIT;
                     throw new RuntimeException("Unknown command");
@@ -82,6 +88,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
             if (condition == Condition.NEED_ACTION) {
                 String[] split = commandRead.toString().split("\n");
                 switch (split[0]) {
+
                     case "authorization":
                         System.out.println("authorization");
                         int ID = connectionDB.getIDFromUsername(split[1]);
@@ -89,8 +96,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
                         if (isPasswordEquals) {
                             answerToClient = connectionDB.getFolderName(ID);
                             Path newPath = Paths.get(LOCAL_PATH, answerToClient);
-
-
+                            userFolder = answerToClient;
                             userPath = newPath;
 
                             if (!Files.exists(newPath)) {
@@ -107,6 +113,7 @@ public class Handler extends ChannelInboundHandlerAdapter {
                         serverCommands.sendCommand(channelHandlerContext.channel(), answerToClient);
                         condition = Condition.WAIT;
                         break;
+
                     case "registration":
                         System.out.println("registration");
                         int ifUserExist = connectionDB.getIDFromUsername(split[1]);
@@ -132,8 +139,49 @@ public class Handler extends ChannelInboundHandlerAdapter {
                             condition = Condition.WAIT;
                             break;
                         }
+
                     case "SERVER_FILE_LIST":
                         condition = Condition.SERVER_FILE_LIST;
+                        break;
+
+                    case "download":
+                        System.out.println("case download");
+                        System.out.println("file name: " + userPath.resolve(split[1]));
+                        serverCommands.uploadFile(channelHandlerContext.channel(), null, userPath.resolve(split[1]));
+                        condition = Condition.WAIT;
+                        break;
+
+                    case "updateServerFilesList":
+                        condition = Condition.SERVER_FILE_LIST;
+                        break;
+
+                    case "deleteFile":
+                        serverCommands.deleteFile(userPath.resolve(split[1]));
+                        condition = Condition.SERVER_FILE_LIST;
+                        break;
+
+                    case "mkdir":
+                        serverCommands.createDirectory(userPath, split[1]);
+                        condition = Condition.SERVER_FILE_LIST;
+                        break;
+
+                    case "openDirectory":
+                        System.out.println("DIRECTORY NAME:  " + split[1]);
+                        userPath = userPath.resolve(split[1]);
+                        serverCommands.sendCommand(channelHandlerContext.channel(), "serverPath\n" + userPath.toString());
+                        condition = Condition.SERVER_FILE_LIST;
+                        break;
+
+                    case "upDirectory":
+                        if (userPath.getParent().toString().equals("user")) {
+                            condition = Condition.WAIT;
+                        } else {
+                            System.out.println("USER FOLDER NOW IS: " + userPath.toString());
+                            userPath = userPath.getParent();
+                            serverCommands.sendCommand(channelHandlerContext.channel(), "serverPath\n" + userPath.toString());
+                            condition = Condition.SERVER_FILE_LIST;
+                        }
+
                         break;
                     default:
                         condition = Condition.WAIT;
@@ -161,6 +209,59 @@ public class Handler extends ChannelInboundHandlerAdapter {
                     e.printStackTrace();
                 }
                 condition = Condition.WAIT;
+            }
+
+            if (condition == Condition.FILE_NAME_LENGTH) {
+                if (buf.readableBytes() >= 4) {
+                    fileNameLength = buf.readInt();
+                    System.out.println("fileNameLength: " + fileNameLength);
+                    condition = Condition.FILE_NAME;
+                }
+            }
+
+            if (condition == Condition.FILE_NAME) {
+                if (buf.readableBytes() >= fileNameLength) {
+                    byte[] filenameBytes = new byte[fileNameLength];
+                    buf.readBytes(filenameBytes);
+                    String fileName = new String(filenameBytes, StandardCharsets.UTF_8);
+                    File file = new File(userPath.toString() + File.separator + fileName);
+                    try {
+                        out = new BufferedOutputStream(new FileOutputStream((file)));
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("fileName: " + fileName);
+                    condition = Condition.FILE_LENGTH;
+                }
+            }
+
+            if (condition == Condition.FILE_LENGTH) {
+                if (buf.readableBytes() >= 8) {
+                    fileSize = buf.readLong();
+                    System.out.println("fileSize: " + fileSize);
+                    condition = Condition.FILE;
+                }
+            }
+
+            if (condition == Condition.FILE) {
+                while (buf.readableBytes() > 0) {
+                    try {
+                        out.write(buf.readByte());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    receivedFileSize++;
+                    if (fileSize == receivedFileSize) {
+                        condition = Condition.SERVER_FILE_LIST;
+                        System.out.println("File received");
+                        try {
+                            out.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        break;
+                    }
+                }
             }
         }
         if (buf.readableBytes() == 0) {
